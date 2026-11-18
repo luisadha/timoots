@@ -1,0 +1,78 @@
+name: Unzip openme.zip
+
+on:
+  # Jalan otomatis saat openme.zip di-push/diubah
+  push:
+    paths:
+      - openme.zip
+  # Bisa juga dijalankan manual dari tab Actions
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: unzip-openme
+  cancel-in-progress: false
+
+env:
+  ZIP_FILE: openme.zip
+  # "true"  = hapus openme.zip dari repo setelah diekstrak
+  # "false" = biarkan openme.zip tetap ada
+  DELETE_ZIP: "true"
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cek keberadaan zip
+        id: check
+        run: |
+          if [ -f "$ZIP_FILE" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$ZIP_FILE tidak ada di root repo, tidak ada yang dikerjakan."
+          fi
+
+      - name: Ekstrak ke root repo
+        if: steps.check.outputs.found == 'true'
+        run: |
+          set -euo pipefail
+          shopt -s dotglob nullglob
+
+          TMP="$(mktemp -d)"
+          unzip -q -o "$ZIP_FILE" -d "$TMP"
+          rm -rf "$TMP/__MACOSX"
+
+          # Jika zip hanya berisi satu folder induk (mis. threads-mutual-web/),
+          # isinya dipindahkan langsung ke root repo.
+          entries=("$TMP"/*)
+          if [ "${#entries[@]}" -eq 1 ] && [ -d "${entries[0]}" ]; then
+            SRC="${entries[0]}"
+          else
+            SRC="$TMP"
+          fi
+
+          cp -a "$SRC"/. .
+          echo "Isi zip berhasil diekstrak ke root repo."
+
+      - name: Commit dan push hasil ekstrak
+        if: steps.check.outputs.found == 'true'
+        run: |
+          set -euo pipefail
+          if [ "$DELETE_ZIP" = "true" ]; then
+            git rm -q -f "$ZIP_FILE"
+          fi
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Tidak ada perubahan untuk di-commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: ekstrak $ZIP_FILE"
+          git push
