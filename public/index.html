@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Cek siapa yang saling follow di Threads dari file ekspor data. Diproses di browser, tanpa login.">
+  <title>Cek Mutual Threads</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <p class="eyebrow">Threads</p>
+      <h1>Siapa yang saling follow dengan Anda?</h1>
+      <p class="lead">Unggah data followers dan following dari ekspor data Meta. Semuanya diproses di browser Anda; tidak ada yang dikirim ke server dan tidak perlu login.</p>
+    </header>
+
+    <section class="card" aria-labelledby="step1">
+      <h2 id="step1">1. Masukkan data</h2>
+
+      <div class="drops">
+        <label class="drop" id="drop-followers" for="file-followers">
+          <span class="drop-title">Followers</span>
+          <span class="drop-hint">Seret file ke sini atau klik untuk memilih<br>.json · .html · .txt · .csv</span>
+          <span class="drop-status" id="status-followers">Belum ada file</span>
+          <input class="visually-hidden" type="file" id="file-followers" multiple
+                 accept=".json,.html,.htm,.txt,.csv,application/json,text/html,text/plain,text/csv">
+        </label>
+
+        <label class="drop" id="drop-following" for="file-following">
+          <span class="drop-title">Following</span>
+          <span class="drop-hint">Seret file ke sini atau klik untuk memilih<br>.json · .html · .txt · .csv</span>
+          <span class="drop-status" id="status-following">Belum ada file</span>
+          <input class="visually-hidden" type="file" id="file-following" multiple
+                 accept=".json,.html,.htm,.txt,.csv,application/json,text/html,text/plain,text/csv">
+        </label>
+      </div>
+
+      <details>
+        <summary>Atau tempel daftar username</summary>
+        <div class="paste">
+          <label>Followers
+            <textarea id="paste-followers" spellcheck="false" placeholder="@andi&#10;@budi&#10;https://www.threads.com/@cici"></textarea>
+          </label>
+          <label>Following
+            <textarea id="paste-following" spellcheck="false" placeholder="@andi&#10;@cici"></textarea>
+          </label>
+        </div>
+      </details>
+
+      <details class="howto">
+        <summary>Cara mengambil data dari Meta</summary>
+        <ol>
+          <li>Buka Pengaturan di Threads/Instagram, lalu <strong>Pusat Akun (Accounts Center)</strong>.</li>
+          <li>Pilih <strong>Informasi dan izin Anda</strong>, lalu <strong>Unduh informasi Anda</strong>.</li>
+          <li>Pilih akun Threads, pilih data <strong>Followers and following</strong>, format <strong>JSON</strong> (atau HTML).</li>
+          <li>Setelah siap, unduh dan ekstrak ZIP-nya. Jika followers dipecah menjadi beberapa file (mis. <code>followers_1.json</code>, <code>followers_2.json</code>), pilih semuanya sekaligus.</li>
+        </ol>
+      </details>
+
+      <div class="actions">
+        <button class="btn primary" id="analyze" type="button" disabled>Analisis</button>
+        <button class="btn" id="reset" type="button">Reset</button>
+      </div>
+      <p class="msg" id="msg" role="status"></p>
+    </section>
+
+    <section class="card" id="results" aria-labelledby="step2" hidden>
+      <h2 id="step2">2. Hasil</h2>
+      <div class="stats" id="stats"></div>
+
+      <div class="tabs" id="tabs" role="tablist" aria-label="Kategori hasil"></div>
+      <p class="tab-desc" id="tab-desc"></p>
+
+      <div class="toolbar">
+        <input type="search" id="search" placeholder="Cari username…" aria-label="Cari username" autocomplete="off">
+        <button class="btn" id="copy" type="button">Salin</button>
+        <button class="btn" id="csv" type="button">Unduh CSV</button>
+        <button class="btn" id="json" type="button">Unduh semua (JSON)</button>
+      </div>
+      <p class="count"><span id="count"></span> <span class="flash" id="flash" role="status"></span></p>
+
+      <div id="panel" role="tabpanel">
+        <ul class="users" id="list"></ul>
+        <p class="empty" id="empty" hidden></p>
+      </div>
+    </section>
+
+    <footer class="foot">Tidak berafiliasi dengan Meta atau Threads. Data Anda tidak disimpan.</footer>
+  </main>
+
+  <script src="/core.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>
